@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8"> <!-- Add this meta tag to specify UTF-8 encoding -->
+  <title>ESP8266 Sensor Data</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <!-- Add the Bootstrap CSS link -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="side-menu" id="sideMenu">
+    <div class="side-menu-content">
+      <p class="table-name"></p>
+      <p>Version: 1.0</p>
+      <p class="db-name"></p>
+      <p class="mysql-connection">MySQL Connection: <span id="connectionStatus">Connecting...</span></p>
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle">
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </div>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-2">
+        <button class="menu-button" onclick="toggleSideMenu()"></button>
+      </div>
+      <div class="col-md-10">
+        <div class="card bg-dark text-light mt-4">
+          <div class="card-header">
+            <h4 class="card-title">Sensor Data</h4>
+          </div>
+          <div class="card-body" id="sensorDataList">
+            <!-- Data will be dynamically added here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
