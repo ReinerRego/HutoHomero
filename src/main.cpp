@@ -18,7 +18,7 @@ int previousMillis = 0;    // Store the last time a task was executed
 
 String hostnamePrefix = "CharterHutohomero-";
 String combinedHostname = "default";
-const char *serverAddress = "51.20.83.151";
+const char *serverAddress = "51.20.165.73";
 ESP8266WebServer server(80);
 
 bool loadSettings(char *data);
