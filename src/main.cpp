@@ -319,13 +319,13 @@ String login(const char *username, const char *password)
     else
     {
       Serial.println("Failed to parse JSON response");
-      return "102";
+      return "103";
     }
   }
   else
   {
     Serial.println("HTTP request failed");
-    return "103";
+    return "102";
   }
 
   http.end();
