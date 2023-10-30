@@ -5,6 +5,17 @@
 #include <ArduinoJson.h>
 #include <Hash.h>
 #include <ESP8266mDNS.h>
+#include <SPI.h>
+#include <Wire.h>
+#include "SSD1306Wire.h"
+#include "fonts.h"
+#include "images.h"
+#define SCREEN_WIDTH 128    // OLED display width, in pixels
+#define SCREEN_HEIGHT 64    // OLED display height, in pixels
+#define OLED_RESET -1       // Reset pin not used
+#define SCREEN_ADDRESS 0x3C // I2C address of the OLED screen
+
+SSD1306Wire display(0x3C, SDA, SCL);
 
 const char *defaultUsername = "defaultUser";
 const char *defaultPassword = "defaultPassword";
@@ -14,8 +25,8 @@ String accessToken = "0";
 int defaultPostDelay = 0;
 String macStr = "default";
 String macSHA1 = "default";
-int previousMillis = 0;    // Store the last time a task was executed
-
+int previousMillis = 0;
+int lastProgress = 0;
 String hostnamePrefix = "CharterHutohomero-";
 String combinedHostname = "default";
 const char *serverAddress = "51.20.165.73";
@@ -30,15 +41,25 @@ void factoryReset();
 float readTemperature();
 String login(const char *username, const char *password);
 void postData();
+void drawProgress(int progress, String topMessage, String message);
 
 void setup()
 {
+  Serial.begin(115200);
+  display.init();
+  display.mirrorScreen();
+  display.flipScreenVertically();
+  display.setTextAlignment(TEXT_ALIGN_CENTER);
+  display.setFont(Roboto_12);
+  display.drawString(64, 0, "Charter HH ");
+  drawProgress(1, "Charter HH", "");
+  display.display();
   macStr = WiFi.macAddress();
   macSHA1 = sha1(macStr);
   combinedHostname = hostnamePrefix + macSHA1.substring(0, 8).c_str();
 
   LittleFS.begin();
-  Serial.begin(115200);
+  drawProgress(16, "Charter HH", "Fajlrendszer inditasa...");
   Serial.println(combinedHostname);
   // Load the settings from the config file
   char configFileData[512]; // Adjust the size as needed
@@ -58,13 +79,14 @@ void setup()
       WiFi.mode(WIFI_STA);
       WiFi.hostname(combinedHostname);
       WiFi.begin(ssid, wifiPassword);
+      drawProgress(32, "Charter HH", "WiFi-hez csatlakozas...");
       while (WiFi.status() != WL_CONNECTED)
       {
         delay(1000);
         Serial.println("Connecting to WiFi...");
       }
       Serial.println("Connected to WiFi");
-
+      drawProgress(48, "Charter HH", "WiFi-hez csatlakozva!");
       if (MDNS.begin(combinedHostname))
       {
         Serial.println("mDNS responder started");
@@ -72,8 +94,14 @@ void setup()
       else
       {
         Serial.println("Error setting up mDNS responder");
-      }
+        drawProgress(64, "Charter HH", "mDNS hiba!");
 
+        while (true)
+        {
+          ESP.wdtFeed();
+        }
+      }
+      drawProgress(80, "Charter HH", "Bejelentkezes...");
       delay(1000);
       String tempAccessToken = login(defaultUsername, defaultPassword);
       while (tempAccessToken == "102" || tempAccessToken == "103" || tempAccessToken == "104")
@@ -83,6 +111,7 @@ void setup()
       }
       accessToken = tempAccessToken;
     }
+    drawProgress(90, "Charter HH", "Bejelentkezve!");
   }
   else
   {
@@ -91,6 +120,7 @@ void setup()
 
     // Add the server.on for "/setup" route
     server.on("/setup", HTTP_POST, handleSetup);
+    drawProgress(90, "Charter HH", "Beallitas mod...");
     setupMode();
   }
 
@@ -99,19 +129,37 @@ void setup()
 
   server.begin();
   delay(1000);
+  drawProgress(100, "Charter HH", "Kesz!");
+  delay(1000);
+  display.clear();
+  display.display();
 }
 
 void loop()
 {
+
   server.handleClient();
   if (strcmp(defaultUsername, "defaultUser") != 0)
   {
+    display.drawXbm(0, -1, 128, 64, image_data_wifiConnected);
+    display.setFont(Roboto_10);
+
+    macStr = WiFi.macAddress();
+    macSHA1 = sha1(macStr);
+    macSHA1 = macSHA1.substring(0, 8).c_str();
+    display.drawString(104, 1, macSHA1);
+    display.drawLine(3, 15, 125, 15);
+    display.display();
+
     int currentMillis = millis(); // Get the current time
     if (currentMillis - previousMillis >= defaultPostDelay)
     {
       postData();
       previousMillis = currentMillis;
     }
+  }
+  else
+  {
   }
 }
 void setupMode()
@@ -377,4 +425,31 @@ void postData()
   }
 
   http.end();
+}
+int lastProgress2 = 0;
+unsigned long previousMillis2 = 0;
+int delayValue = 1;
+const int progressValueMax = 100;
+const int animationInterval = 100; // Adjust as needed
+
+void drawProgress(int progressValue, String topMessage, String message)
+{
+  if (progressValue < 0 || progressValue > 100)
+  {
+    return; // Ensure progressValue is within a valid range
+  }
+  display.clear();
+  display.setFont(Roboto_10);
+  display.drawString(64, 23, message);
+  Serial.println(message);
+  display.setFont(Roboto_12);
+  display.drawString(64, 0, topMessage);
+  for (int progress = lastProgress; progress <= progressValue; progress++)
+  {
+    int delayValue = map(progress, lastProgress, progressValue, 3, 400);
+    display.drawProgressBar(14, 43, 102, 14, progress);
+    display.display();
+    lastProgress = progress;
+    delay(delayValue);
+  }
 }
