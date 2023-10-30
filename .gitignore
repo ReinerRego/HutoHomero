@@ -4,3 +4,4 @@
 .vscode/launch.json
 .vscode/ipch
 user_database*
+src/stresstest.py
