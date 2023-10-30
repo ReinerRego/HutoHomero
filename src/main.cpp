@@ -32,6 +32,7 @@ String hostnamePrefix = "CharterHutohomero-";
 String combinedHostname = "default";
 const char *serverAddress = "51.20.165.73";
 ESP8266WebServer server(80);
+int waitingTime = 10;
 
 bool loadSettings(char *data);
 void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay);
@@ -121,7 +122,7 @@ void setup()
 
     // Add the server.on for "/setup" route
     server.on("/setup", HTTP_POST, handleSetup);
-    drawProgress(90, "Charter HH", "Beallitas mod...");
+    drawProgress(100, "Charter HH", "Folytassa az alkalmazasban!");
     setupMode();
   }
 
@@ -129,40 +130,45 @@ void setup()
   server.on("/factoryReset", HTTP_GET, factoryReset);
 
   server.begin();
-  delay(1000);
-  drawProgress(100, "Charter HH", "Kesz!");
-  delay(1000);
-  display.clear();
-  display.display();
+  if (strcmp(defaultUsername, "defaultUser") != 0)
+  {
+    delay(1000);
+    drawProgress(100, "Charter HH", "Kesz!");
+    delay(1000);
+    display.clear();
+    display.display();
+  }
+
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
 }
 
 void loop()
 {
-
-  server.handleClient();
   if (strcmp(defaultUsername, "defaultUser") != 0)
   {
     int currentMillis2 = millis(); // Get the current time
-    if (currentMillis2 - previousMillis >= 200)
+    if (currentMillis2 - previousMillis2 >= waitingTime)
     {
+      display.normalDisplay();
       display.clear();
       display.drawXbm(0, -1, 128, 64, image_data_wifiConnected);
       display.setFont(Roboto_10);
-
       macStr = WiFi.macAddress();
       macSHA1 = sha1(macStr);
       macSHA1 = macSHA1.substring(0, 8).c_str();
       display.drawString(104, 1, macSHA1);
       display.drawLine(3, 15, 125, 15);
       display.setFont(Open_Sans_SemiBold_27);
-      int widht = 70;
-      display.drawString(widht, 22, String(readTemperature()).substring(0, 4) + "C");
+      int widht = 64;
+      display.drawString(widht, 20, String(readTemperature()).substring(0, 4) + "C");
       int widht2 = display.getStringWidth(String(readTemperature()).substring(0, 4) + "C");
-      display.drawCircle((widht + widht2 / 2) + 6, 32, 2);
-      display.drawCircle((widht + widht2 / 2) + 6, 32, 3);
+      display.drawCircle((widht + widht2 / 2) + 6, 30, 2);
+      display.drawCircle((widht + widht2 / 2) + 6, 30, 3);
 
       display.display();
       previousMillis2 = currentMillis2;
+      waitingTime = 30000;
     }
     int currentMillis = millis(); // Get the current time
     if (currentMillis - previousMillis >= defaultPostDelay)
@@ -170,10 +176,36 @@ void loop()
       postData();
       previousMillis = currentMillis;
     }
+    bool inverted = false;
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(1000);
+      display.clear();
+      display.drawXbm(0, -1, 128, 64, image_data_wifiConnected);
+      display.setFont(Roboto_10);
+      macStr = WiFi.macAddress();
+      macSHA1 = sha1(macStr);
+      macSHA1 = macSHA1.substring(0, 8).c_str();
+      display.drawString(104, 1, macSHA1);
+      display.drawLine(3, 15, 125, 15);
+      display.setFont(Roboto_16);
+      display.drawString(64, 20, "Nincs WiFi jel!");
+      display.setFont(Roboto_12);
+      display.drawString(64, 40, "Ujraprobalkozas...");
+      if (inverted)
+      {
+        display.normalDisplay();
+        inverted = false;
+      }
+      else
+      {
+        display.invertDisplay();
+        inverted = true;
+      }
+      display.display();
+    }
   }
-  else
-  {
-  }
+  server.handleClient();
 }
 void setupMode()
 {
@@ -231,7 +263,7 @@ void setupMode()
 
 float readTemperature()
 {
-  const int numReadings = 1000;
+  const int numReadings = 1500;
   float sum = 0;
 
   for (int i = 0; i < numReadings; i++)
@@ -457,7 +489,7 @@ void drawProgress(int progressValue, String topMessage, String message)
   display.drawString(64, 0, topMessage);
   for (int progress = lastProgress; progress <= progressValue; progress++)
   {
-    int delayValue = map(progress, lastProgress, progressValue, 3, 400);
+    int delayValue = map(progress, lastProgress, progressValue, 1, 400);
     display.drawProgressBar(14, 43, 102, 14, progress);
     display.display();
     lastProgress = progress;
