@@ -61,6 +61,21 @@
 	}
 	```
 
+- #### **Legújabb verzió:** 
+  **```/latestVersion``` URI-n lehet.**
+  
+  Jelenleg ez hardcode-olva van, de később majd automatikusan fogja nézni a mappában.
+**Példa cURL-t használva:**
+	```
+	curl -X POST -H "Content-Type: application/json" http://localhost:5000/latestVersion
+	```
+	**Szerver válasza:**
+	```
+	{
+	  "latest": "V1.0"
+	}
+	```
+
 ### Eszköz hibakódjai:
  - ##### **102:**
     **Az eszköz nem tudja elérni a szervert.**

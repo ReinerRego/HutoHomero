@@ -172,6 +172,11 @@ def post_data():
     else:
         return jsonify({'message': 'Unauthorized', 'status': 'unauthorized'}), 403
     
+@app.route('/latestVersion', methods=['POST'])
+def latest_version():
+    return jsonify({'latest': "V1.0"}), 201
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
 
