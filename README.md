@@ -1,5 +1,4 @@
-<h1 style="text-align: center;">Hűtőhőmérő</h1>
-<p style="text-align: center;">Neve megmagyarázza. A projekt egy *ESP8266*-os microcontrollert használ, később majd lesz **ESP32** variánsra is.</p>
+#Hűtőhőmérő
 
 ## Dokumentáció:
 ### API:
