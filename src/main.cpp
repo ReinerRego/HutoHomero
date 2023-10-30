@@ -26,6 +26,7 @@ int defaultPostDelay = 0;
 String macStr = "default";
 String macSHA1 = "default";
 int previousMillis = 0;
+int previousMillis2 = 2;
 int lastProgress = 0;
 String hostnamePrefix = "CharterHutohomero-";
 String combinedHostname = "default";
@@ -141,16 +142,28 @@ void loop()
   server.handleClient();
   if (strcmp(defaultUsername, "defaultUser") != 0)
   {
-    display.drawXbm(0, -1, 128, 64, image_data_wifiConnected);
-    display.setFont(Roboto_10);
+    int currentMillis2 = millis(); // Get the current time
+    if (currentMillis2 - previousMillis >= 200)
+    {
+      display.clear();
+      display.drawXbm(0, -1, 128, 64, image_data_wifiConnected);
+      display.setFont(Roboto_10);
 
-    macStr = WiFi.macAddress();
-    macSHA1 = sha1(macStr);
-    macSHA1 = macSHA1.substring(0, 8).c_str();
-    display.drawString(104, 1, macSHA1);
-    display.drawLine(3, 15, 125, 15);
-    display.display();
+      macStr = WiFi.macAddress();
+      macSHA1 = sha1(macStr);
+      macSHA1 = macSHA1.substring(0, 8).c_str();
+      display.drawString(104, 1, macSHA1);
+      display.drawLine(3, 15, 125, 15);
+      display.setFont(Open_Sans_SemiBold_27);
+      int widht = 70;
+      display.drawString(widht, 22, String(readTemperature()).substring(0, 4) + "C");
+      int widht2 = display.getStringWidth(String(readTemperature()).substring(0, 4) + "C");
+      display.drawCircle((widht + widht2 / 2) + 6, 32, 2);
+      display.drawCircle((widht + widht2 / 2) + 6, 32, 3);
 
+      display.display();
+      previousMillis2 = currentMillis2;
+    }
     int currentMillis = millis(); // Get the current time
     if (currentMillis - previousMillis >= defaultPostDelay)
     {
@@ -218,7 +231,7 @@ void setupMode()
 
 float readTemperature()
 {
-  const int numReadings = 1500;
+  const int numReadings = 1000;
   float sum = 0;
 
   for (int i = 0; i < numReadings; i++)
@@ -426,9 +439,7 @@ void postData()
 
   http.end();
 }
-int lastProgress2 = 0;
-unsigned long previousMillis2 = 0;
-int delayValue = 1;
+
 const int progressValueMax = 100;
 const int animationInterval = 100; // Adjust as needed
 
