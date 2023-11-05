@@ -21,6 +21,7 @@ const char *defaultUsername = "defaultUser";
 const char *defaultPassword = "defaultPassword";
 const char *defaultSSID = "defaultSSID";
 const char *defaultWiFiPassword = "defaultWiFiPassword";
+const char *defaultLocation = "default";
 String accessToken = "0";
 int defaultPostDelay = 0;
 String macStr = "default";
@@ -35,11 +36,12 @@ ESP8266WebServer server(80);
 int waitingTime = 10;
 
 bool loadSettings(char *data);
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay);
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char* location);
 void handleReset();
 void handleSetup();
 void setupMode();
 void factoryReset();
+void available();
 float readTemperature();
 String login(const char *username, const char *password);
 void postData();
@@ -77,6 +79,7 @@ void setup()
       defaultUsername = jsonDoc["username"];
       defaultPassword = jsonDoc["password"];
       defaultPostDelay = jsonDoc["postDelay"];
+      defaultLocation = jsonDoc["location"];
       // Try connecting to Wi-Fi with the loaded credentials
       WiFi.mode(WIFI_STA);
       WiFi.hostname(combinedHostname);
@@ -128,6 +131,7 @@ void setup()
 
   server.on("/reset", HTTP_GET, handleReset);
   server.on("/factoryReset", HTTP_GET, factoryReset);
+  server.on("/available", HTTP_GET, available);
 
   server.begin();
   if (strcmp(defaultUsername, "defaultUser") != 0)
@@ -243,10 +247,11 @@ void setupMode()
       const char *password = jsonDoc["password"] | defaultPassword;
       const char *ssid = jsonDoc["ssid"] | defaultSSID;
       const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
+      const char *location = jsonDoc["location"] | defaultLocation;
       int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
 
       // Save the settings to LittleFS
-      saveSettings(username, password, ssid, wifiPassword, postDelay);
+      saveSettings(username, password, ssid, wifiPassword, postDelay, location);
 
       // Send a success response
       server.send(200, "text/plain", "Settings saved successfully. Rebooting...");
@@ -293,9 +298,9 @@ void handleSetup()
     const char *ssid = jsonDoc["ssid"] | defaultSSID;
     const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
     int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
-
+    const char *location = jsonDoc["location"] | defaultWiFiPassword;
     // Save the settings to LittleFS
-    saveSettings(username, password, ssid, wifiPassword, postDelay);
+    saveSettings(username, password, ssid, wifiPassword, postDelay, location);
 
     // Send a success response
     server.send(200, "text/plain", "Settings saved successfully. Rebooting...");
@@ -346,7 +351,7 @@ void factoryReset()
   delay(1000);
   ESP.restart();
 }
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay)
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char *location)
 {
   File configFile = LittleFS.open("/config.txt", "w");
   if (configFile)
@@ -357,6 +362,7 @@ void saveSettings(const char *username, const char *password, const char *ssid, 
     jsonDoc["ssid"] = ssid;
     jsonDoc["wifiPassword"] = wifiPassword;
     jsonDoc["postDelay"] = postDelay;
+    jsonDoc["location"] = location;
 
     serializeJson(jsonDoc, configFile);
     configFile.close();
@@ -430,7 +436,7 @@ void postData()
   doc["humidity"] = String(0);
   doc["temperature"] = String(readTemperature());
   doc["pressure"] = String(0);
-  doc["location"] = "default";
+  doc["location"] = defaultLocation;
   doc["access_token"] = accessToken;
 
   Serial.println("Posting data..");
@@ -495,4 +501,16 @@ void drawProgress(int progressValue, String topMessage, String message)
     lastProgress = progress;
     delay(delayValue);
   }
+}
+
+void available()
+{
+  DynamicJsonDocument doc(256);
+  doc["available"] = "yes";
+
+  String jsonData;
+  serializeJson(doc, jsonData);
+  Serial.println(jsonData);
+
+  server.send(200, "text/plain", jsonData);
 }
