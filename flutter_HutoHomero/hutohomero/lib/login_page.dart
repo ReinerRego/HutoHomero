@@ -5,6 +5,8 @@ import 'package:hutohomero/main.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'dart:ui';
+import 'package:get/get.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -71,8 +73,7 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context) {
           return AlertDialog(
             title: const Text('Hiba!'),
-            content: const Text(
-                'Ismeretlen hiba történt! (unreachable)'),
+            content: const Text('Ismeretlen hiba történt! (unreachable)'),
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -102,8 +103,10 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
+            SizedBox(height: MediaQuery.of(context).padding.top + 20),
             Container(
               width: 338,
               height: 150,
@@ -165,7 +168,10 @@ class _LoginPageState extends State<LoginPage> {
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [Image(image: AssetImage('assets/snowflake.png'))],
+                                children: [
+                                  Image(
+                                      image: AssetImage('assets/snowflake.png'))
+                                ],
                               ),
                             ),
                           ),
