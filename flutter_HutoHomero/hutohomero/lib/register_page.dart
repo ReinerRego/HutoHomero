@@ -8,26 +8,30 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:flutter/services.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class RegisterPage extends StatefulWidget {
+  const RegisterPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _RegisterPageState createState() => _RegisterPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
-  Future<void> login() async {
-    final String url = 'http://51.20.165.73:5000/login';
+  final TextEditingController emailController = TextEditingController();
+  Future<void> register() async {
+    final String url = 'http://51.20.165.73:5000/register';
     final Map<String, dynamic> data = {
       'username': usernameController.text,
       'password': passwordController.text,
+      'email': emailController.text,
     };
 
     final String jsonData = json.encode(data);
-
+    final bool emailValid = RegExp(
+            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+        .hasMatch(emailController.text);
+    print(emailValid);
     final response = await http.post(
       Uri.parse(url),
       body: jsonData,
@@ -39,22 +43,22 @@ class _LoginPageState extends State<LoginPage> {
     final responseData = json.decode(response.body);
     final status = responseData['status'];
 
-    if (response.statusCode == 200) {
-      // Save login details to SharedPreferences
+    if (response.statusCode == 201) {
+      // Save register details to SharedPreferences
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setString('username', usernameController.text);
       prefs.setString('password', passwordController.text);
 
       runApp(const MyApp());
     }
-    if (response.statusCode == 401) {
+    if (response.statusCode == 400) {
       // ignore: use_build_context_synchronously
       showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Helytelen adatok'),
-            content: const Text('Helytelenül adtad meg az adataidat.'),
+            title: const Text('Hiba!'),
+            content: const Text('Ez a felhasználónév már foglalt.'),
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -72,7 +76,7 @@ class _LoginPageState extends State<LoginPage> {
         builder: (context) {
           return AlertDialog(
             title: const Text('Hiba!'),
-            content: const Text('Ismeretlen hiba történt! (unreachable)'),
+            content: const Text('Ismeretlen hiba történt!'),
             actions: <Widget>[
               ElevatedButton(
                 onPressed: () {
@@ -83,16 +87,6 @@ class _LoginPageState extends State<LoginPage> {
             ],
           );
         },
-      );
-    }
-    void clearSavedCredentials() async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.remove('username');
-      prefs.remove('password');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Saved credentials removed for debugging.'),
-        ),
       );
     }
   }
@@ -116,16 +110,16 @@ class _LoginPageState extends State<LoginPage> {
         children: [
           Positioned.fill(
             child: SvgPicture.string('''
-             <svg width="428" height="503" viewBox="0 0 428 503" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path fill-rule="evenodd" clip-rule="evenodd" d="M299.376 257.475C300.448 248.466 301 239.298 301 230C301 102.975 198.025 0 71 0C-56.0255 0 -159 102.975 -159 230C-159 341.492 -79.6698 434.456 25.6241 455.525C24.5517 464.534 24 473.702 24 483C24 610.026 126.975 713 254 713C381.026 713 484 610.026 484 483C484 371.508 404.67 278.544 299.376 257.475Z" fill="url(#paint0_linear_52_11)"/>
+             <svg width="422" height="530" viewBox="0 0 422 530" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" clip-rule="evenodd" d="M270.376 257.475C271.448 248.466 272 239.298 272 230C272 102.975 169.025 0 42 0C-85.0255 0 -188 102.975 -188 230C-188 341.492 -108.67 434.456 -3.37593 455.525C-4.44833 464.534 -5 473.702 -5 483C-5 610.026 97.9745 713 225 713C352.026 713 455 610.026 455 483C455 371.508 375.67 278.544 270.376 257.475Z" fill="url(#paint0_linear_35_3)"/>
   <defs>
-    <linearGradient id="paint0_linear_52_11" x1="162.5" y1="0" x2="162.5" y2="713" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#B7EEFF" stop-opacity="0.812874"/>
-      <stop offset="0.347994" stop-color="#B3E4FF" stop-opacity="0.582261"/>
-      <stop offset="0.718648" stop-color="#D7F8FF" stop-opacity="0"/>
+    <linearGradient id="paint0_linear_35_3" x1="133.5" y1="0" x2="133.5" y2="713" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C9FFD5" stop-opacity="0.812874"/>
+      <stop offset="0.666667" stop-color="#D7FFE2" stop-opacity="0.276174"/>
+      <stop offset="1" stop-color="#F2FFD7" stop-opacity="0"/>
     </linearGradient>
   </defs>
-</svg> 
+</svg>
               ''',
                 width: MediaQuery.of(context).size.width * 1,
                 alignment: Alignment.bottomLeft,
@@ -197,7 +191,7 @@ class _LoginPageState extends State<LoginPage> {
                           height: MediaQuery.of(context).size.width * 0.020),
                       SizedBox(
                         child: Text(
-                          'Üdvözlünk újra!',
+                          'Üdvözlünk!',
                           style: TextStyle(
                             color: Colors.black,
                             fontSize: MediaQuery.of(context).size.width * 0.075,
@@ -225,12 +219,35 @@ class _LoginPageState extends State<LoginPage> {
                     ],
                   ),
                 ),
-                SizedBox(height: MediaQuery.of(context).size.width * 0.47),
+                SizedBox(height: MediaQuery.of(context).size.width * 0.37),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 59),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextFormField(
+                          controller: emailController,
+                          obscureText: false,
+                          decoration: const InputDecoration(
+                            labelText: 'Email',
+                            labelStyle: TextStyle(
+                              // Add this to set the label font style
+                              color: Colors.black,
+                              fontFamily:
+                                  'Montserrat', // Replace with the desired font family
+                              fontSize:
+                                  14.0, // Replace with the desired font size
+                              fontWeight: FontWeight
+                                  .w700, // Replace with the desired font weight
+                            ),
+                            border: UnderlineInputBorder(),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
                         child: TextFormField(
@@ -275,10 +292,11 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      SizedBox(height: MediaQuery.of(context).size.width * 0.1),
+                      SizedBox(
+                          height: MediaQuery.of(context).size.width * 0.27),
                       ElevatedButton(
                         onPressed: () {
-                          login();
+                          register();
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
@@ -292,10 +310,10 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: Container(
                           width: MediaQuery.of(context).size.width *
-                              0.32, // This makes the button take up the available width
+                              0.60, // This makes the button take up the available width
                           child: const Center(
                             child: Text(
-                              'Folytatás',
+                              'Regisztrálás & Folytatás',
                               style: TextStyle(
                                 fontSize: 18,
                                 fontFamily: 'Montserrat',
@@ -305,55 +323,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.05),
-                      SizedBox(
-                        child: Text(
-                          'Elfelejtetted a jelszavad?',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: const Color(0xFF6B6B6B),
-                            fontSize: MediaQuery.of(context).size.width *
-                                0.035, // Adjust the multiplier as needed
-                            fontFamily: 'Montserrat',
-                            fontWeight: FontWeight.w600,
-                            height: 0,
-                          ),
-                        ),
-                      ),
-                      SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.004),
-                      SizedBox(
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Nincs még fiókod? ',
-                                style: TextStyle(
-                                  color: const Color(0xFF6B6B6B),
-                                  fontSize: MediaQuery.of(context).size.width *
-                                      0.035, // Adjust the multiplier as needed
-                                  fontFamily: 'Montserrat',
-                                  fontWeight: FontWeight.w300,
-                                  height: 0,
-                                ),
-                              ),
-                              TextSpan(
-                                text: 'Hozz létre egyet!',
-                                style: TextStyle(
-                                  color: const Color(0xFF6B6B6B),
-                                  fontSize: MediaQuery.of(context).size.width *
-                                      0.035, // Adjust the multiplier as needed
-                                  fontFamily: 'Montserrat',
-                                  fontWeight: FontWeight.w600,
-                                  height: 0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      )
                     ],
                   ),
                 )

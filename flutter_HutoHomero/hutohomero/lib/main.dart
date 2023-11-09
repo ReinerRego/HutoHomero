@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hutohomero/choose_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 import 'login_page.dart';
@@ -12,7 +13,7 @@ void main() async {
 
   runApp(savedUsername != null && savedPassword != null
       ? const MyApp()
-      : const LoginApp());
+      : const ChooseApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -31,19 +32,21 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class LoginApp extends StatelessWidget {
-  const LoginApp({super.key});
+class ChooseApp extends StatelessWidget {
+  const ChooseApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Login Page',
+      title: 'Choosing Page',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 93, 223, 255)
         ),
         useMaterial3: true,
       ),
-      home: const LoginPage(),
+      home: const ChoosePage(),
     );
   }
 }
+
+

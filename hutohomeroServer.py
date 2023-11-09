@@ -81,6 +81,7 @@ with app.app_context():
             id INTEGER PRIMARY KEY,
             username TEXT NOT NULL,
             password TEXT NOT NULL,
+            email TEXT NOT NULL,
             access_token TEXT
         )
     ''')
@@ -97,9 +98,9 @@ def register_user():
     data = request.json
     username = data.get('username')
     password = data.get('password')
-
-    if not username or not password:
-        return jsonify({'message': 'Invalid username or password', 'status': 'invalidRegister'}), 400
+    email = data.get('email')
+    if not username or not password or not email:
+        return jsonify({'message': 'Invalid username or password or email', 'status': 'invalidRegister'}), 400
 
     db = get_db()
     cursor = db.cursor()
@@ -113,7 +114,7 @@ def register_user():
 
     access_token = generate_access_token()
 
-    cursor.execute("INSERT INTO users (username, password, access_token) VALUES (?, ?, ?)", (username, password, access_token))
+    cursor.execute("INSERT INTO users (username, password, email, access_token) VALUES (?, ?, ?, ?)", (username, password, email, access_token))
     db.commit()
     cursor.close()
 

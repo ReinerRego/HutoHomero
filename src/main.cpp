@@ -247,7 +247,9 @@ void setupMode()
       const char *password = jsonDoc["password"] | defaultPassword;
       const char *ssid = jsonDoc["ssid"] | defaultSSID;
       const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
+      Serial.println(String(jsonDoc["location"]));
       const char *location = jsonDoc["location"] | defaultLocation;
+      Serial.println(defaultLocation);
       int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
 
       // Save the settings to LittleFS
@@ -298,8 +300,10 @@ void handleSetup()
     const char *ssid = jsonDoc["ssid"] | defaultSSID;
     const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
     int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
-    const char *location = jsonDoc["location"] | defaultWiFiPassword;
+    Serial.println(String(jsonDoc["location"]));
+    const char *location = jsonDoc["location"] | defaultLocation;
     // Save the settings to LittleFS
+    Serial.println(defaultLocation);
     saveSettings(username, password, ssid, wifiPassword, postDelay, location);
 
     // Send a success response
@@ -362,6 +366,8 @@ void saveSettings(const char *username, const char *password, const char *ssid, 
     jsonDoc["ssid"] = ssid;
     jsonDoc["wifiPassword"] = wifiPassword;
     jsonDoc["postDelay"] = postDelay;
+    Serial.println("savesettings ");
+    Serial.println(location);
     jsonDoc["location"] = location;
 
     serializeJson(jsonDoc, configFile);
@@ -436,7 +442,8 @@ void postData()
   doc["humidity"] = String(0);
   doc["temperature"] = String(readTemperature());
   doc["pressure"] = String(0);
-  doc["location"] = defaultLocation;
+  doc["location"] = "defaultLocation";
+  Serial.println(defaultLocation);
   doc["access_token"] = accessToken;
 
   Serial.println("Posting data..");

@@ -39,6 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_svg: ^2.0.9
   get: ^4.6.6
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +85,8 @@ flutter:
           weight: 700
         - asset: fonts/Montserrat-SemiBold.ttf
           weight: 600
+        - asset: fonts/Montserrat-Light.ttf
+          weight: 300
   assets:
     - assets/snowflake.png
   # For details regarding fonts from package dependencies,
