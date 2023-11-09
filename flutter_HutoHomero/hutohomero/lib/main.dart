@@ -3,8 +3,11 @@ import 'package:hutohomero/choose_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
 import 'login_page.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
 
@@ -24,7 +27,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 93, 223, 255)),
+        colorScheme:
+            ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 93, 223, 255)),
         useMaterial3: true,
       ),
       home: const MyHomePage(title: 'Charter hűtőhőmerő'),
@@ -40,13 +44,11 @@ class ChooseApp extends StatelessWidget {
     return MaterialApp(
       title: 'Choosing Page',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromARGB(255, 93, 223, 255)
-        ),
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromARGB(255, 93, 223, 255)),
         useMaterial3: true,
       ),
       home: const ChoosePage(),
     );
   }
 }
-
-

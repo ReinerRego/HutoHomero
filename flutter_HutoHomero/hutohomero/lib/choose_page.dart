@@ -6,6 +6,7 @@ import 'package:hutohomero/register_page.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class ChoosePage extends StatefulWidget {
   const ChoosePage({super.key});
@@ -79,6 +80,7 @@ class _ChoosePageState extends State<ChoosePage> {
 //Setting SystmeUIMode
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
         overlays: [SystemUiOverlay.top]);
+    FlutterNativeSplash.remove();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(

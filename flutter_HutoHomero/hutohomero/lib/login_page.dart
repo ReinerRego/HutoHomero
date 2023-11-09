@@ -18,6 +18,15 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  
+  if (usernameController.text.length < 4) {
+      _showErrorDialog('Hiba!',
+          'A felhasználónévnek legalább 4 karakter hosszúnak kell lennie.');
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
 
   Future<void> login() async {
     final String url = 'http://51.20.165.73:5000/login';
@@ -121,15 +130,25 @@ class _LoginPageState extends State<LoginPage> {
   <defs>
     <linearGradient id="paint0_linear_52_11" x1="162.5" y1="0" x2="162.5" y2="713" gradientUnits="userSpaceOnUse">
       <stop stop-color="#B7EEFF" stop-opacity="0.812874"/>
-      <stop offset="0.347994" stop-color="#B3E4FF" stop-opacity="0.582261"/>
-      <stop offset="0.718648" stop-color="#D7F8FF" stop-opacity="0"/>
+      <stop offset="0.270833" stop-color="#B3E4FF" stop-opacity="0.582261"/>
+      <stop offset="0.776042" stop-color="#D7F8FF" stop-opacity="0"/>
     </linearGradient>
   </defs>
-</svg> 
+</svg>
               ''',
                 width: MediaQuery.of(context).size.width * 1,
                 alignment: Alignment.bottomLeft,
                 fit: BoxFit.none),
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 10,
+            left: 10.0,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
           ),
           Center(
             child: Column(

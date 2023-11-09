@@ -40,6 +40,7 @@ dependencies:
   flutter_svg: ^2.0.9
   get: ^4.6.6
   auto_size_text: ^3.0.0
+  flutter_native_splash: ^2.3.5
 
 dev_dependencies:
   flutter_test:
@@ -91,3 +92,28 @@ flutter:
     - assets/snowflake.png
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_native_splash:
+  # This package generates native code to customize Flutter's default white native splash screen
+  # with background color and splash image.
+  # Customize the parameters below, and run the following command in the terminal:
+  # dart run flutter_native_splash:create
+  # To restore Flutter's default white splash screen, run the following command in the terminal:
+  # dart run flutter_native_splash:remove
+
+  # IMPORTANT NOTE: These parameter do not affect the configuration of Android 12 and later, which
+  # handle splash screens differently that prior versions of Android.  Android 12 and later must be
+  # configured specifically in the android_12 section below.
+  
+  # color or background_image is the only required parameter.  Use color to set the background
+  # of your splash screen to a solid color.  Use background_image to set the background of your
+  # splash screen to a png image.  This is useful for gradients. The image will be stretch to the
+  # size of the app. Only one parameter can be used, color and background_image cannot both be set.
+  color: "#FFFFFF"
+  background_image: "assets/snowflake.png"
+
+  # Optional parameters are listed below.  To enable a parameter, uncomment the line by removing
+  # the leading # character.
+
+  # The image parameter allows you to specify an image used in the splash screen.  It must be a
+  # png file and should be sized for 4x pixel density.
+  image: "assets/snowflake.png"

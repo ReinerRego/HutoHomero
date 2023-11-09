@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -22,7 +23,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> checkAvailability() async {
     try {
-      final response = await http.get(Uri.parse('http://192.168.4.1/available'));
+      final response =
+          await http.get(Uri.parse('http://192.168.4.1/available'));
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         return responseData['available'];
@@ -102,7 +104,8 @@ class _MyHomePageState extends State<MyHomePage> {
             } else {
               return AlertDialog(
                 title: Text('Az eszköz elérhetetlen.'),
-                content: Text('Biztos vagy benne, hogy csatlakozva vagy az eszköz WiFi hálózatára?'),
+                content: Text(
+                    'Biztos vagy benne, hogy csatlakozva vagy az eszköz WiFi hálózatára?'),
                 actions: <Widget>[
                   ElevatedButton(
                     onPressed: () {
@@ -159,12 +162,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
+    FlutterNativeSplash.remove();
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Color.fromARGB(255, 93, 223, 255), // Set the background color of the app bar
+        backgroundColor: Color.fromARGB(
+            255, 93, 223, 255), // Set the background color of the app bar
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.delete),
