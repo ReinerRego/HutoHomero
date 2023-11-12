@@ -41,6 +41,7 @@ dependencies:
   get: ^4.6.6
   auto_size_text: ^3.0.0
   flutter_native_splash: ^2.3.5
+  multicast_dns: ^0.3.2+4
 
 dev_dependencies:
   flutter_test:

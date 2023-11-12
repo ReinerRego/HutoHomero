@@ -19,10 +19,25 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController passwordController2 = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
-  bool isLoading = false;
-
   Future<void> register() async {
-    final String url = 'http://51.20.165.73:5000/register';
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          title: Text('Regisztrálás'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(), //<---
+              SizedBox(height: 23.0),
+            ],
+          ),
+        );
+      },
+    );
+    
+    const String url = 'http://51.20.165.73:5000/register';
     final Map<String, dynamic> data = {
       'username': usernameController.text,
       'password': passwordController.text,
@@ -36,31 +51,19 @@ class _RegisterPageState extends State<RegisterPage> {
 
     if (!emailValid) {
       _showErrorDialog('Hiba!', 'Érvénytelen email cím.');
-      setState(() {
-        isLoading = false;
-      });
       return;
     }
     if (usernameController.text.length < 4) {
       _showErrorDialog('Hiba!',
           'A felhasználónévnek legalább 4 karakter hosszúnak kell lennie.');
-      setState(() {
-        isLoading = false;
-      });
       return;
     }
 
     if (passwordController.text != passwordController2.text) {
       _showErrorDialog('Hiba!', 'A jelszavak nem egyeznek.');
-      setState(() {
-        isLoading = false;
-      });
       return;
     }
     print(emailValid);
-    setState(() {
-      isLoading = true;
-    });
 
     try {
       final response = await http.post(
@@ -87,10 +90,8 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       _showErrorDialog('Hiba!', 'Valami hiba történt: $e');
     } finally {
-      setState(() {
-        isLoading = false;
-      });
     }
+    Navigator.of(context).pop();
   }
 
   void _showErrorDialog(String title, String content) {

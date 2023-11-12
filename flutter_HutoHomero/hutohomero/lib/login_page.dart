@@ -19,15 +19,6 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   
-  if (usernameController.text.length < 4) {
-      _showErrorDialog('Hiba!',
-          'A felhasználónévnek legalább 4 karakter hosszúnak kell lennie.');
-      setState(() {
-        isLoading = false;
-      });
-      return;
-    }
-
   Future<void> login() async {
     final String url = 'http://51.20.165.73:5000/login';
     final Map<String, dynamic> data = {

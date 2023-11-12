@@ -36,7 +36,7 @@ ESP8266WebServer server(80);
 int waitingTime = 10;
 
 bool loadSettings(char *data);
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char* location);
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay);
 void handleReset();
 void handleSetup();
 void setupMode();
@@ -69,9 +69,10 @@ void setup()
   char configFileData[512]; // Adjust the size as needed
   if (loadSettings(configFileData))
   {
+    Serial.println(configFileData);
     DynamicJsonDocument jsonDoc(512);
     DeserializationError error = deserializeJson(jsonDoc, configFileData);
-
+    Serial.println(String(jsonDoc["postDelay"]));
     if (!error)
     {
       const char *ssid = jsonDoc["ssid"] | defaultSSID;
@@ -79,8 +80,7 @@ void setup()
       defaultUsername = jsonDoc["username"];
       defaultPassword = jsonDoc["password"];
       defaultPostDelay = jsonDoc["postDelay"];
-      defaultLocation = jsonDoc["location"];
-      // Try connecting to Wi-Fi with the loaded credentials
+      Serial.println(defaultPostDelay);
       WiFi.mode(WIFI_STA);
       WiFi.hostname(combinedHostname);
       WiFi.begin(ssid, wifiPassword);
@@ -148,9 +148,10 @@ void setup()
 }
 
 void loop()
-{
+{ 
   if (strcmp(defaultUsername, "defaultUser") != 0)
   {
+    MDNS.update();
     int currentMillis2 = millis(); // Get the current time
     if (currentMillis2 - previousMillis2 >= waitingTime)
     {
@@ -240,20 +241,19 @@ void setupMode()
     // Handle the setup data and save settings
     DynamicJsonDocument jsonDoc(512);
     DeserializationError error = deserializeJson(jsonDoc, server.arg("plain"));
-
+    Serial.println(server.arg("plain"));
     if (!error)
     {
       const char *username = jsonDoc["username"] | defaultUsername;
       const char *password = jsonDoc["password"] | defaultPassword;
       const char *ssid = jsonDoc["ssid"] | defaultSSID;
       const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
-      Serial.println(String(jsonDoc["location"]));
-      const char *location = jsonDoc["location"] | defaultLocation;
-      Serial.println(defaultLocation);
+      Serial.println(String(jsonDoc["postDelay"]));
+      Serial.println(String(jsonDoc["ssid"]));
       int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
 
       // Save the settings to LittleFS
-      saveSettings(username, password, ssid, wifiPassword, postDelay, location);
+      saveSettings(username, password, ssid, wifiPassword, postDelay);
 
       // Send a success response
       server.send(200, "text/plain", "Settings saved successfully. Rebooting...");
@@ -300,11 +300,9 @@ void handleSetup()
     const char *ssid = jsonDoc["ssid"] | defaultSSID;
     const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
     int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
-    Serial.println(String(jsonDoc["location"]));
-    const char *location = jsonDoc["location"] | defaultLocation;
     // Save the settings to LittleFS
     Serial.println(defaultLocation);
-    saveSettings(username, password, ssid, wifiPassword, postDelay, location);
+    saveSettings(username, password, ssid, wifiPassword, postDelay);
 
     // Send a success response
     server.send(200, "text/plain", "Settings saved successfully. Rebooting...");
@@ -355,7 +353,7 @@ void factoryReset()
   delay(1000);
   ESP.restart();
 }
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char *location)
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay)
 {
   File configFile = LittleFS.open("/config.txt", "w");
   if (configFile)
@@ -367,8 +365,7 @@ void saveSettings(const char *username, const char *password, const char *ssid, 
     jsonDoc["wifiPassword"] = wifiPassword;
     jsonDoc["postDelay"] = postDelay;
     Serial.println("savesettings ");
-    Serial.println(location);
-    jsonDoc["location"] = location;
+    Serial.println(postDelay);
 
     serializeJson(jsonDoc, configFile);
     configFile.close();
