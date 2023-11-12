@@ -232,10 +232,15 @@ class _MyHomePageState extends State<MyHomePage> {
             255, 93, 223, 255), // Set the background color of the app bar
         actions: <Widget>[
           IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: mDNS,
+          ),
+          IconButton(
             icon: const Icon(Icons.delete),
             onPressed: clearSavedCredentials,
           ),
         ],
+        
       ),
       body: const Center(
         child: Column(

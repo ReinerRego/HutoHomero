@@ -27,16 +27,19 @@ int defaultPostDelay = 0;
 String macStr = "default";
 String macSHA1 = "default";
 int previousMillis = 0;
-int previousMillis2 = 2;
+int previousMillis2 = 0;
 int lastProgress = 0;
 String hostnamePrefix = "CharterHutohomero-";
 String combinedHostname = "default";
 const char *serverAddress = "51.20.165.73";
 ESP8266WebServer server(80);
-int waitingTime = 10;
+int waitingTime = 30;
+float lastTemp = 0;
+const char* version = "V1.0";
+const char* defaultIdentifier = "defaultIdentifier";
 
 bool loadSettings(char *data);
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay);
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char* identifier);
 void handleReset();
 void handleSetup();
 void setupMode();
@@ -46,6 +49,7 @@ float readTemperature();
 String login(const char *username, const char *password);
 void postData();
 void drawProgress(int progress, String topMessage, String message);
+void info();
 
 void setup()
 {
@@ -69,10 +73,8 @@ void setup()
   char configFileData[512]; // Adjust the size as needed
   if (loadSettings(configFileData))
   {
-    Serial.println(configFileData);
     DynamicJsonDocument jsonDoc(512);
     DeserializationError error = deserializeJson(jsonDoc, configFileData);
-    Serial.println(String(jsonDoc["postDelay"]));
     if (!error)
     {
       const char *ssid = jsonDoc["ssid"] | defaultSSID;
@@ -80,6 +82,7 @@ void setup()
       defaultUsername = jsonDoc["username"];
       defaultPassword = jsonDoc["password"];
       defaultPostDelay = jsonDoc["postDelay"];
+      defaultIdentifier = jsonDoc["identifier"];
       Serial.println(defaultPostDelay);
       WiFi.mode(WIFI_STA);
       WiFi.hostname(combinedHostname);
@@ -94,7 +97,7 @@ void setup()
       if (MDNS.begin(combinedHostname))
       {
         Serial.println("mDNS responder started");
-        MDNS.addService("charter", "tcp", 80);
+        MDNS.addService("hutohomero", "tcp", 80);
       }
       else
       {
@@ -130,6 +133,7 @@ void setup()
   server.on("/reset", HTTP_GET, handleReset);
   server.on("/factoryReset", HTTP_GET, factoryReset);
   server.on("/available", HTTP_GET, available);
+  server.on("/info", HTTP_GET, info);
 
   server.begin();
   if (strcmp(defaultUsername, "defaultUser") != 0)
@@ -143,10 +147,12 @@ void setup()
 
   WiFi.setAutoReconnect(true);
   WiFi.persistent(true);
+
+  readTemperature();
 }
 
 void loop()
-{ 
+{
   if (strcmp(defaultUsername, "defaultUser") != 0)
   {
     MDNS.update();
@@ -164,11 +170,12 @@ void loop()
       display.drawLine(3, 15, 125, 15);
       display.setFont(Open_Sans_SemiBold_27);
       int widht = 64;
-      display.drawString(widht, 20, String(readTemperature()).substring(0, 4) + "C");
-      int widht2 = display.getStringWidth(String(readTemperature()).substring(0, 4) + "C");
+      float temperatureFloat = readTemperature();
+      display.drawString(widht, 20, String(temperatureFloat).substring(0, 4) + "C");
+      int widht2 = display.getStringWidth(String(temperatureFloat).substring(0, 4) + "C");
       display.drawCircle((widht + widht2 / 2) + 6, 30, 2);
       display.drawCircle((widht + widht2 / 2) + 6, 30, 3);
-
+      lastTemp = temperatureFloat;
       display.display();
       previousMillis2 = currentMillis2;
       waitingTime = 30000;
@@ -269,7 +276,7 @@ void setupMode()
 
 float readTemperature()
 {
-  const int numReadings = 500;
+  const int numReadings = 1200;
   float sum = 0;
 
   for (int i = 0; i < numReadings; i++)
@@ -352,7 +359,7 @@ void factoryReset()
   delay(1000);
   ESP.restart();
 }
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay)
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char* identifier)
 {
   File configFile = LittleFS.open("/config.txt", "w");
   if (configFile)
@@ -363,6 +370,7 @@ void saveSettings(const char *username, const char *password, const char *ssid, 
     jsonDoc["ssid"] = ssid;
     jsonDoc["wifiPassword"] = wifiPassword;
     jsonDoc["postDelay"] = postDelay;
+    jsonDoc["postDelay"] = identifier;
     Serial.println("savesettings ");
     Serial.println(postDelay);
 
@@ -419,7 +427,7 @@ String login(const char *username, const char *password)
     }
     else
     {
-      Serial.println("Failed to parse JSON response");
+      Serial.println("Failusernameed to parse JSON response");
       return "103";
     }
   }
@@ -511,6 +519,21 @@ void available()
   DynamicJsonDocument doc(256);
   doc["available"] = "yes";
 
+  String jsonData;
+  serializeJson(doc, jsonData);
+  Serial.println(jsonData);
+
+  server.send(200, "text/plain", jsonData);
+}
+
+void info()
+{
+  DynamicJsonDocument doc(256);
+  doc["username"] = defaultUsername;
+  doc["lastTemp"] = lastTemp;
+  doc["identifier"] = defaultIdentifier;
+  doc["uptime"] = String(millis());
+  doc["version"] = version;
   String jsonData;
   serializeJson(doc, jsonData);
   Serial.println(jsonData);
