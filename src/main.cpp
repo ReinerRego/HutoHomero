@@ -87,7 +87,6 @@ void setup()
       drawProgress(32, "Charter HH", "WiFi-hez csatlakozas...");
       while (WiFi.status() != WL_CONNECTED)
       {
-        delay(1000);
         Serial.println("Connecting to WiFi...");
       }
       Serial.println("Connected to WiFi");
@@ -95,6 +94,7 @@ void setup()
       if (MDNS.begin(combinedHostname))
       {
         Serial.println("mDNS responder started");
+        MDNS.addService("charter", "tcp", 80);
       }
       else
       {
@@ -107,12 +107,10 @@ void setup()
         }
       }
       drawProgress(80, "Charter HH", "Bejelentkezes...");
-      delay(1000);
       String tempAccessToken = login(defaultUsername, defaultPassword);
       while (tempAccessToken == "102" || tempAccessToken == "103" || tempAccessToken == "104")
       {
         tempAccessToken = login(defaultUsername, defaultPassword);
-        delay(5000);
       }
       accessToken = tempAccessToken;
     }
@@ -178,6 +176,7 @@ void loop()
     int currentMillis = millis(); // Get the current time
     if (currentMillis - previousMillis >= defaultPostDelay)
     {
+      MDNS.update();
       postData();
       previousMillis = currentMillis;
     }
@@ -270,7 +269,7 @@ void setupMode()
 
 float readTemperature()
 {
-  const int numReadings = 1500;
+  const int numReadings = 500;
   float sum = 0;
 
   for (int i = 0; i < numReadings; i++)

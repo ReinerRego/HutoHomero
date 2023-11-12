@@ -1,10 +1,12 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, prefer_function_declarations_over_variables
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:multicast_dns/multicast_dns.dart';
+import 'dart:io';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -20,6 +22,47 @@ class _MyHomePageState extends State<MyHomePage> {
   final TextEditingController wifiPasswordController = TextEditingController();
   final TextEditingController postDelayController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
+
+  Future<void> mDNS() async {
+    // Parse the command line arguments.
+    var factory = (dynamic host, int port,
+        {bool reuseAddress = true, bool reusePort = true, int ttl = 200}) {
+      return RawDatagramSocket.bind(host, port,
+          reuseAddress: true, reusePort: false, ttl: 200);
+    };
+
+    var client = MDnsClient(rawDatagramSocketFactory: factory);
+
+    const String name = '_charter._tcp.local';
+    // Start the client with default options.
+    await client.start();
+
+    // Get the PTR record for the service.
+    await for (final PtrResourceRecord ptr in client
+        .lookup<PtrResourceRecord>(ResourceRecordQuery.serverPointer(name))) {
+      // Use the domainName from the PTR record to get the SRV record,
+      // which will have the port and local hostname.
+      // Note that duplicate messages may come through, especially if any
+      // other mDNS queries are running elsewhere on the machine.
+      await for (final SrvResourceRecord srv
+          in client.lookup<SrvResourceRecord>(
+              ResourceRecordQuery.service(ptr.domainName))) {
+        // Domain name will be something like "io.flutter.example@some-iphone.local._dartobservatory._tcp.local"
+        final String bundleId =
+            ptr.domainName; //.substring(0, ptr.domainName.indexOf('@'));
+        print('Dart observatory instance found at '
+            '${srv.target}:${srv.port}:${srv.name} for "$bundleId".');
+        await for (final IPAddressResourceRecord ip
+            in client.lookup<IPAddressResourceRecord>(
+                ResourceRecordQuery.addressIPv4(srv.target))) {
+          print('IP: ${ip.address.toString()}');
+        }
+      }
+    }
+    client.stop();
+
+    print('Done.');
+  }
 
   Future<String> checkAvailability() async {
     try {
@@ -150,7 +193,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'ssid': ssidController.text,
       'wifiPassword': wifiPasswordController.text,
       'postDelay': postDelay,
-      'locazion' : locationController.text
+      'locazion': locationController.text
     };
     final String jsonData = json.encode(data);
     final response = await http.post(
