@@ -17,6 +17,23 @@
 
 SSD1306Wire display(0x3C, SDA, SCL);
 
+
+
+// https://arduino.stackexchange.com/questions/50861/nodemcu-eeprom-corrupting
+
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+//USE THIS
+
 const char *defaultUsername = "defaultUser";
 const char *defaultPassword = "defaultPassword";
 const char *defaultSSID = "defaultSSID";
@@ -35,11 +52,11 @@ const char *serverAddress = "51.20.165.73";
 ESP8266WebServer server(80);
 int waitingTime = 30;
 float lastTemp = 0;
-const char* version = "V1.0";
-const char* defaultIdentifier = "defaultIdentifier";
+const char *version = "V1.0";
+const char *defaultIdentifier = "defaultIdentifier";
 
 bool loadSettings(char *data);
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char* identifier);
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char *identifier);
 void handleReset();
 void handleSetup();
 void setupMode();
@@ -73,12 +90,13 @@ void setup()
   char configFileData[512]; // Adjust the size as needed
   if (loadSettings(configFileData))
   {
-    DynamicJsonDocument jsonDoc(512);
+    DynamicJsonDocument jsonDoc(1024);
     DeserializationError error = deserializeJson(jsonDoc, configFileData);
     if (!error)
     {
       const char *ssid = jsonDoc["ssid"] | defaultSSID;
       const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
+      Serial.println(String(jsonDoc["username"]));
       defaultUsername = jsonDoc["username"];
       defaultPassword = jsonDoc["password"];
       defaultPostDelay = jsonDoc["postDelay"];
@@ -153,6 +171,7 @@ void setup()
 
 void loop()
 {
+  Serial.println(defaultUsername);
   if (strcmp(defaultUsername, "defaultUser") != 0)
   {
     MDNS.update();
@@ -257,9 +276,10 @@ void setupMode()
       Serial.println(String(jsonDoc["postDelay"]));
       Serial.println(String(jsonDoc["ssid"]));
       int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
+      const char *identifier = jsonDoc["identifier"] | defaultIdentifier;
 
       // Save the settings to LittleFS
-      saveSettings(username, password, ssid, wifiPassword, postDelay);
+      saveSettings(username, password, ssid, wifiPassword, postDelay, identifier);
 
       // Send a success response
       server.send(200, "text/plain", "Settings saved successfully. Rebooting...");
@@ -306,9 +326,10 @@ void handleSetup()
     const char *ssid = jsonDoc["ssid"] | defaultSSID;
     const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
     int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
+    const char *identifier = jsonDoc["identifier"] | defaultIdentifier;
     // Save the settings to LittleFS
     Serial.println(defaultLocation);
-    saveSettings(username, password, ssid, wifiPassword, postDelay);
+    saveSettings(username, password, ssid, wifiPassword, postDelay, identifier);
 
     // Send a success response
     server.send(200, "text/plain", "Settings saved successfully. Rebooting...");
@@ -359,20 +380,18 @@ void factoryReset()
   delay(1000);
   ESP.restart();
 }
-void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char* identifier)
+void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char *identifier)
 {
   File configFile = LittleFS.open("/config.txt", "w");
   if (configFile)
   {
-    DynamicJsonDocument jsonDoc(512);
+    DynamicJsonDocument jsonDoc(1024);
     jsonDoc["username"] = username;
     jsonDoc["password"] = password;
     jsonDoc["ssid"] = ssid;
     jsonDoc["wifiPassword"] = wifiPassword;
     jsonDoc["postDelay"] = postDelay;
-    jsonDoc["postDelay"] = identifier;
-    Serial.println("savesettings ");
-    Serial.println(postDelay);
+    jsonDoc["identifier"] = identifier;
 
     serializeJson(jsonDoc, configFile);
     configFile.close();
@@ -528,7 +547,7 @@ void available()
 
 void info()
 {
-  DynamicJsonDocument doc(256);
+  DynamicJsonDocument doc(1024);
   doc["username"] = defaultUsername;
   doc["lastTemp"] = lastTemp;
   doc["identifier"] = defaultIdentifier;
