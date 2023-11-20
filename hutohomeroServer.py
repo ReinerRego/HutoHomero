@@ -157,7 +157,7 @@ def get_userdata():
     db = get_db()
     cursor = db.cursor()
 
-    cursor.execute("SELECT email FROM users WHERE access_token = ?", (access_token))
+    cursor.execute("SELECT email FROM users WHERE access_token = ?", (access_token,))
     user_data = cursor.fetchone()
 
     cursor.close()
