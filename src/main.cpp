@@ -17,22 +17,20 @@
 
 SSD1306Wire display(0x3C, SDA, SCL);
 
-
-
 // https://arduino.stackexchange.com/questions/50861/nodemcu-eeprom-corrupting
 
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
-//USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
+// USE THIS
 
 const char *defaultUsername = "defaultUser";
 const char *defaultPassword = "defaultPassword";
@@ -54,6 +52,9 @@ int waitingTime = 30;
 float lastTemp = 0;
 const char *version = "V1.0";
 const char *defaultIdentifier = "defaultIdentifier";
+String usernameString = "username";
+int resetPin = 14;
+String statusString;
 
 bool loadSettings(char *data);
 void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char *identifier);
@@ -67,9 +68,12 @@ String login(const char *username, const char *password);
 void postData();
 void drawProgress(int progress, String topMessage, String message);
 void info();
+void factoryResetButton();
+void status();
 
 void setup()
 {
+  pinMode(resetPin, INPUT_PULLUP);
   Serial.begin(115200);
   display.init();
   display.mirrorScreen();
@@ -98,10 +102,12 @@ void setup()
       const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
       Serial.println(String(jsonDoc["username"]));
       defaultUsername = jsonDoc["username"];
+      usernameString = String(jsonDoc["username"]);
       defaultPassword = jsonDoc["password"];
       defaultPostDelay = jsonDoc["postDelay"];
       defaultIdentifier = jsonDoc["identifier"];
       Serial.println(defaultPostDelay);
+      Serial.println(defaultIdentifier);
       WiFi.mode(WIFI_STA);
       WiFi.hostname(combinedHostname);
       WiFi.begin(ssid, wifiPassword);
@@ -109,6 +115,7 @@ void setup()
       while (WiFi.status() != WL_CONNECTED)
       {
         Serial.println("Connecting to WiFi...");
+        delay(1000);
       }
       Serial.println("Connected to WiFi");
       drawProgress(48, "Charter HH", "WiFi-hez csatlakozva!");
@@ -144,6 +151,7 @@ void setup()
 
     // Add the server.on for "/setup" route
     server.on("/setup", HTTP_POST, handleSetup);
+    server.on("/status", HTTP_GET, status);
     drawProgress(100, "Charter HH", "Folytassa az alkalmazasban!");
     setupMode();
   }
@@ -171,7 +179,6 @@ void setup()
 
 void loop()
 {
-  Serial.println(defaultUsername);
   if (strcmp(defaultUsername, "defaultUser") != 0)
   {
     MDNS.update();
@@ -236,6 +243,14 @@ void loop()
     }
   }
   server.handleClient();
+  if (digitalRead(resetPin) == LOW)
+  {
+    delay(2000);
+    if (digitalRead(resetPin) == LOW)
+    {
+      factoryResetButton();
+    }
+  }
 }
 void setupMode()
 {
@@ -277,7 +292,7 @@ void setupMode()
       Serial.println(String(jsonDoc["ssid"]));
       int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
       const char *identifier = jsonDoc["identifier"] | defaultIdentifier;
-
+      
       // Save the settings to LittleFS
       saveSettings(username, password, ssid, wifiPassword, postDelay, identifier);
 
@@ -327,8 +342,17 @@ void handleSetup()
     const char *wifiPassword = jsonDoc["wifiPassword"] | defaultWiFiPassword;
     int postDelay = jsonDoc["postDelay"] | defaultPostDelay;
     const char *identifier = jsonDoc["identifier"] | defaultIdentifier;
+    WiFi.hostname(combinedHostname);
+    WiFi.begin(ssid, wifiPassword);
+    drawProgress(32, "Charter HH", "WiFi-hez csatlakozas...");
+    while (WiFi.status() != WL_CONNECTED)
+    {
+      Serial.println("Connecting to WiFi...");
+      delay(1000);
+    }
+    Serial.println("Connected to WiFi");
     // Save the settings to LittleFS
-    Serial.println(defaultLocation);
+    Serial.println(defaultIdentifier);
     saveSettings(username, password, ssid, wifiPassword, postDelay, identifier);
 
     // Send a success response
@@ -380,6 +404,23 @@ void factoryReset()
   delay(1000);
   ESP.restart();
 }
+
+void factoryResetButton()
+{
+  // Delete all files in / directory
+  Dir dir = LittleFS.openDir("/");
+  while (dir.next())
+  {
+    String pathStr = "/" + dir.fileName();
+    if (pathStr != "/")
+    {
+      LittleFS.remove(pathStr);
+    }
+  };
+  Serial.println("Factory reset was successful. Rebooting...");
+  delay(1000);
+  ESP.restart();
+}
 void saveSettings(const char *username, const char *password, const char *ssid, const char *wifiPassword, int postDelay, const char *identifier)
 {
   File configFile = LittleFS.open("/config.txt", "w");
@@ -392,7 +433,7 @@ void saveSettings(const char *username, const char *password, const char *ssid, 
     jsonDoc["wifiPassword"] = wifiPassword;
     jsonDoc["postDelay"] = postDelay;
     jsonDoc["identifier"] = identifier;
-
+    Serial.println(String(defaultIdentifier));
     serializeJson(jsonDoc, configFile);
     configFile.close();
   }
@@ -548,11 +589,22 @@ void available()
 void info()
 {
   DynamicJsonDocument doc(1024);
-  doc["username"] = defaultUsername;
+  doc["username"] = usernameString;
   doc["lastTemp"] = lastTemp;
   doc["identifier"] = defaultIdentifier;
   doc["uptime"] = String(millis());
   doc["version"] = version;
+  String jsonData;
+  serializeJson(doc, jsonData);
+  Serial.println(jsonData);
+
+  server.send(200, "text/plain", jsonData);
+}
+
+void status()
+{
+  DynamicJsonDocument doc(128);
+  doc["status"] = statusString;
   String jsonData;
   serializeJson(doc, jsonData);
   Serial.println(jsonData);

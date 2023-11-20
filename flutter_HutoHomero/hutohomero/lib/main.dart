@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hutohomero/choose_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
-import 'login_page.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
@@ -25,13 +24,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Charter Hűtőhőmérő',
       theme: ThemeData(
         colorScheme:
             ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 93, 223, 255)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Charter hűtőhőmerő'),
+      home: const MyHomePage(title: 'Charter Hűtőhőmérő'),
     );
   }
 }
@@ -42,7 +41,7 @@ class ChooseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Choosing Page',
+      title: 'Charter Hűtőhőmérő',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
             seedColor: const Color.fromARGB(255, 93, 223, 255)),

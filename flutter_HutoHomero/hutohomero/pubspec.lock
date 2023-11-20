@@ -97,6 +97,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.6"
+  dbus:
+    dependency: transitive
+    description:
+      name: dbus
+      sha256: "365c771ac3b0e58845f39ec6deebc76e3276aa9922b0cc60840712094d9047ac"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.10"
   fake_async:
     dependency: transitive
     description:
@@ -216,6 +224,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  list_picker:
+    dependency: "direct main"
+    description:
+      path: "../list_picker-1.1.0"
+      relative: true
+    source: path
+    version: "1.1.0"
   matcher:
     dependency: transitive
     description:
@@ -248,6 +263,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.3.2+4"
+  network_info_plus:
+    dependency: "direct main"
+    description:
+      name: network_info_plus
+      sha256: "2d9e88b9a459e5d4e224f828d26cc38ea140511e89b943116939994324be5c96"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.1.0"
+  network_info_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: network_info_plus_platform_interface
+      sha256: "881f5029c5edaf19c616c201d3d8b366c5b1384afd5c1da5a49e4345de82fb8b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.3"
+  nm:
+    dependency: transitive
+    description:
+      name: nm
+      sha256: "2c9aae4127bdc8993206464fcc063611e0e36e72018696cd9631023a31b24254"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   path:
     dependency: transitive
     description:
@@ -376,6 +415,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  sidebarx:
+    dependency: "direct main"
+    description:
+      name: sidebarx
+      sha256: acf77df4647a3f77e128eef5dd0daf89d44e6b1f157e8f8f9bd0963d42b22570
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.16.2"
   sky_engine:
     dependency: transitive
     description: flutter
@@ -485,6 +532,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.4-beta"
+  wifi_info_flutter:
+    dependency: "direct main"
+    description:
+      name: wifi_info_flutter
+      sha256: "9662240e4edb8a91b572efa0b4e4c72ee644e25611525633580afc3257386a48"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.2"
+  wifi_info_flutter_platform_interface:
+    dependency: transitive
+    description:
+      name: wifi_info_flutter_platform_interface
+      sha256: "844a9a5f23d1a639cf5fd8b4f007ee4d60526ad63beb35e1cbe2512f1a9921e4"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.1"
+  wifi_scan:
+    dependency: "direct main"
+    description:
+      name: wifi_scan
+      sha256: "01c737b2392b60829d5d07fef782fa5e95e47b25d1728f58f871df1b87c5ebfb"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0+2"
   win32:
     dependency: transitive
     description:

@@ -20,22 +20,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController emailController = TextEditingController();
 
   Future<void> register() async {
-    showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return const AlertDialog(
-          title: Text('Regisztrálás'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(), //<---
-              SizedBox(height: 23.0),
-            ],
-          ),
-        );
-      },
-    );
     
     const String url = 'http://51.20.165.73:5000/register';
     final Map<String, dynamic> data = {
@@ -66,6 +50,22 @@ class _RegisterPageState extends State<RegisterPage> {
     print(emailValid);
 
     try {
+      showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          title: Text('Regisztrálás'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(), //<---
+              SizedBox(height: 23.0),
+            ],
+          ),
+        );
+      },
+    );
       final response = await http.post(
         Uri.parse(url),
         body: jsonData,

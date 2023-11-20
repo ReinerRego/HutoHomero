@@ -1,11 +1,13 @@
 {
 	"folders": [
 		{
-			"path": "."
+			"path": "flutter_HutoHomero/hutohomero"
 		},
 		{
-			"path": "flutter_HutoHomero"
+			"path": "flutter_HutoHomero/list_picker-1.1.0"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"java.compile.nullAnalysis.mode": "disabled"
+	}
 }
