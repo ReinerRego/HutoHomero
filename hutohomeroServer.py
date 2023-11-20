@@ -163,7 +163,7 @@ def get_userdata():
     cursor.close()
 
     if user_data:
-        return jsonify({'access_token': user_data[0], 'status': 'success'}), 200
+        return jsonify({'email': user_data[0], 'status': 'success'}), 200
     else:
         return jsonify({'message': 'Invalid username or password', 'status': 'invalidLogin'}), 401
 
