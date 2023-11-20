@@ -149,7 +149,7 @@ def get_userdata():
     data = request.json
     print(data)
     access_token = data.get('access_token')
-
+    print(access_token)
 
     if not access_token:
         return jsonify({'message': 'Invalid accesstoken', 'status': 'invalidLogin'}), 400
