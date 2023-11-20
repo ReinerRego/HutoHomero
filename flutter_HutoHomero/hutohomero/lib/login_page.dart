@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:hutohomero/home.dart';
+import 'package:hutohomero/home/home.dart';
 import 'package:hutohomero/main.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -220,7 +220,7 @@ class _LoginPageState extends State<LoginPage> {
                       SizedBox(
                           height: MediaQuery.of(context).size.width * 0.020),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.8,
+                        width: MediaQuery.of(context).size.width * 0.9,
                         child: Text(
                           'Kérlek írd be az adataidat a folytatáshoz.',
                           style: TextStyle(

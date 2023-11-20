@@ -143,6 +143,30 @@ def login_user():
         return jsonify({'access_token': user_data[0], 'status': 'success'}), 200
     else:
         return jsonify({'message': 'Invalid username or password', 'status': 'invalidLogin'}), 401
+        
+@app.route('/getUserData', methods=['POST'])
+def get_userdata():
+    data = request.json
+    print(data)
+    username = data.get('access_token')
+
+
+    if not access_token:
+        return jsonify({'message': 'Invalid accesstoken', 'status': 'invalidLogin'}), 400
+
+    db = get_db()
+    cursor = db.cursor()
+
+    cursor.execute("SELECT email FROM users WHERE access_token = ?", (access_token))
+    user_data = cursor.fetchone()
+
+    cursor.close()
+
+    if user_data:
+        return jsonify({'access_token': user_data[0], 'status': 'success'}), 200
+    else:
+        return jsonify({'message': 'Invalid username or password', 'status': 'invalidLogin'}), 401
+
 
 @app.route('/postData', methods=['POST'])
 def post_data():

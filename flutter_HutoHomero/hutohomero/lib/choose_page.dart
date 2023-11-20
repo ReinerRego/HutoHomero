@@ -92,7 +92,7 @@ class _ChoosePageState extends State<ChoosePage> {
               children: <Widget>[
                 SizedBox(height: MediaQuery.of(context).padding.top + 60),
                 Container(
-                  width: MediaQuery.of(context).size.width * 0.8,
+                  width: MediaQuery.of(context).size.width * 0.9,
                   height: MediaQuery.of(context).size.height * 0.18,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -100,7 +100,7 @@ class _ChoosePageState extends State<ChoosePage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: MediaQuery.of(context).size.width * 0.35,
+                        width: MediaQuery.of(context).size.width * 0.38,
                         height: MediaQuery.of(context).size.height * 0.04,
                         child: Stack(
                           children: [
@@ -175,7 +175,7 @@ class _ChoosePageState extends State<ChoosePage> {
                         ),
                         child: Container(
                           width: MediaQuery.of(context).size.width *
-                              0.35, // This makes the button take up the available width
+                              0.38, // This makes the button take up the available width
                           child: const Center(
                             child: Text(
                               'Bejelentkezés',

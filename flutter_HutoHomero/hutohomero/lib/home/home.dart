@@ -141,7 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final String? savedUsername = prefs.getString('username');
     final String? savedPassword = prefs.getString('password');
-
+    String selectedWifi = "";
     showDialog(
       barrierDismissible: false,
       context: context,
@@ -192,7 +192,8 @@ class _MyHomePageState extends State<MyHomePage> {
                       children: <Widget>[
                         ListPickerField(
                           label: "WiFi hálózat",
-                          items: wifiNetworks, // Set the Wi-Fi networks here
+                          items: wifiNetworks,
+                          controller: ssidController,
                         ),
                         TextField(
                           controller: wifiPasswordController,
@@ -240,9 +241,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      sendRequest();
                       _isDialogShowing = false;
                       Navigator.of(context).pop();
+                      Navigator.pop(context);
+                      sendRequest();
                     },
                     child: const Text(
                       'Mentés',
@@ -277,6 +279,22 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> sendRequest() async {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return const AlertDialog(
+          title: Text('Adatok elküldése'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 23.0),
+            ],
+          ),
+        );
+      },
+    );
     try {
       final prefs = await SharedPreferences.getInstance();
       const String url = 'http://192.168.4.1/setup';
@@ -313,12 +331,53 @@ class _MyHomePageState extends State<MyHomePage> {
       if (response.statusCode == 200) {
         // Handle successful response
         print('Request successful');
+        Navigator.pop(context);
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Adatátvétel sikeres!'),
+              content: const Text('Sikeresen átküldtük az adatokat.'),
+              actions: <Widget>[
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       } else {
         // Handle error
         print('Request failed with status code: ${response.statusCode}');
       }
     } catch (e) {
+      // Handle errors
       print('Error: $e');
+
+      // Close the loading dialog
+      Navigator.pop(context);
+
+      // Show an error dialog or handle errors as needed
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Hiba'),
+            content: Text('Egy hiba történt!: $e'),
+            actions: <Widget>[
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -376,12 +435,13 @@ class _MyHomePageState extends State<MyHomePage> {
         );
         final wifiList = await WiFiScan.instance.getScannedResults();
         setState(() {
-        wifiNetworks = wifiList
-            .where((network) => !network.ssid.startsWith("CharterHutohomero"))
-            .map((network) => network.ssid)
-            .toList();
-      });
-    }
+          wifiNetworks = wifiList
+              .where((network) => !network.ssid.startsWith("CharterHutohomero"))
+              .map((network) => network.ssid)
+              .toList();
+        });
+        _latestWifiSSID = wifiName;
+      }
     } catch (e) {
       print("Error getting WiFi name: $e");
     }
