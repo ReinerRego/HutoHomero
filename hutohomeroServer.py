@@ -148,7 +148,7 @@ def login_user():
 def get_userdata():
     data = request.json
     print(data)
-    username = data.get('access_token')
+    access_token = data.get('access_token')
 
 
     if not access_token:
